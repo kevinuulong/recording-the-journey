@@ -1,9 +1,9 @@
 <script>
-    let { src, title, author, scale = 1 } = $props();
+    let { src, title, author, scale = 1, ...rest } = $props();
 </script>
 
-<div class="spine" style:--scale={scale}>
-    <img class="cover" {src} alt={`${title} by ${author}`} />
+<div class="spine" style:--scale={scale} {...rest}>
+    <img class="cover" {src} alt={`${title} — ${author}`} />
 </div>
 
 <style>

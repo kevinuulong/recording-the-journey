@@ -7,7 +7,7 @@
         details,
         closeModal,
         primaryLabel = "Save",
-        secondaryLabel = "Close",
+        secondaryLabel = "Cancel",
         primaryAction = () => {},
         secondaryAction = () => {},
         children,

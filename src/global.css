@@ -57,6 +57,7 @@ a {
 }
 
 input[type="text"],
+input[type="number"],
 select {
     box-sizing: border-box;
     padding: 5px 10px;
@@ -89,10 +90,14 @@ label {
     line-height: 21px;
 }
 
-label:has(+ input:required)::after {
-    content: " *";
-    color: var(--red);
+label:has(+ input:required),
+label:has(+ select:required) {
 
+    &::after {
+        content: " *";
+        color: var(--red);
+
+    }
 }
 
 select {

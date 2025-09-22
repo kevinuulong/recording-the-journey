@@ -28,10 +28,7 @@
 
         font-family: "EB Garamond", Garamond, serif;
         font-weight: 500;
-
-        font-family: "EB Garamond";
         font-style: normal;
-        font-weight: 500;
         font-size: 16px;
         line-height: 21px;
 
@@ -109,6 +106,27 @@
 
         &:disabled {
             color: var(--dark-50);
+        }
+    }
+
+    .link {
+        color: var(--dark-green);
+        background-color: transparent;
+        border-color: transparent;
+
+        font-family: "EB Garamond";
+        font-style: normal;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 21px;
+        text-decoration: underline;
+
+        padding: 0;
+        cursor: pointer;
+
+        &:disabled {
+            color: var(--dark-50);
+            cursor: default;
         }
     }
 </style>

@@ -1,6 +1,7 @@
 <script>
     import Button from "$lib/Button.svelte";
     import Cover from "$lib/Cover.svelte";
+    import CoverButton from "$lib/CoverButton.svelte";
     import Graph from "$lib/Graph.svelte";
     import Modal from "$lib/Modal.svelte";
     import ProfilePhoto from "$lib/ProfilePhoto.svelte";
@@ -31,7 +32,81 @@
     let yearlyGoal = $state(24);
 
     let isAddToLogModalOpen = $state(false);
-    let addToLogModal;
+
+    let addToLogData = $state({
+        pages: null,
+        book: null,
+        date: null,
+        addMode: false,
+    });
+
+    let isSettingsModalOpen = $state(false);
+
+    let settingsData = $state({
+        yearlyGoal: null,
+    });
+
+    function openSettingsModal(defaults) {
+        settingsData = {
+            ...settingsData,
+            yearlyGoal,
+            ...defaults,
+        };
+        isSettingsModalOpen = true;
+    }
+
+    function saveSettings() {
+        yearlyGoal = settingsData.yearlyGoal;
+    }
+
+    let isAddBookModalOpen = $state(false);
+    let addBookData = $state({
+        title: null,
+        authors: null,
+        coverURL: null,
+        uuid: null,
+    });
+
+    function openAddBookModal(uuid) {
+        if (uuid) {
+            const bookIndex = bookData.findIndex((book) => book.uuid === uuid);
+            addBookData.title = bookData[bookIndex].title;
+            addBookData.authors = bookData[bookIndex].authors.join(", ");
+            addBookData.coverURL = bookData[bookIndex].coverURL;
+            addBookData.uuid = bookData[bookIndex].uuid;
+        }
+        isAddBookModalOpen = true;
+    }
+
+    function saveBook(title, authors, coverURL, uuid) {
+        const book = {
+            title,
+            authors,
+            coverURL,
+        };
+        if (!uuid) {
+            uuid = crypto.randomUUID();
+            bookData.unshift({
+                ...book,
+                uuid,
+            });
+        } else {
+            const bookIndex = bookData.findIndex((book) => book.uuid === uuid);
+            bookData[bookIndex] = {
+                ...bookData[bookIndex],
+                ...book,
+            };
+        }
+    }
+
+    function clearAddBookData() {
+        addBookData = {
+            title: null,
+            authors: null,
+            coverURL: null,
+            uuid: null,
+        };
+    }
 
     function getStreak(data) {
         let streak = 0;
@@ -46,6 +121,55 @@
             else return streak;
         }
         return streak;
+    }
+
+    function logReading(pages, uuid, date, addMode = false) {
+        if (uuid) {
+            const bookIndex = bookData.findIndex((book) => book.uuid === uuid);
+            bookData[bookIndex].pages += pages;
+        }
+        if (date) {
+            date = new Date(date * 1000);
+        } else {
+            date = new Date();
+        }
+        date.setHours(0, 0, 0, 0);
+
+        for (let i = logData.length - 1; i >= 0; i--) {
+            const logDate = new Date(logData[i].date * 1000);
+
+            if (date.getTime() === logDate.getTime()) {
+                if (addMode) logData[i].pages += pages;
+                else logData[i].pages = pages;
+                break;
+            }
+            if (date > logData) {
+                // Insert at the correct positions
+                // NOTE: This should only ever be the end if an entry is generated for each day, but it
+                // is technically able to handle any position
+                logData.splice(i + 1, 0, {
+                    date: Math.floor(date.getTime() / 1000),
+                    pages,
+                });
+                break;
+            }
+        }
+    }
+
+    function clearAddToLogData() {
+        addToLogData = {
+            pages: null,
+            book: null,
+            date: null,
+            addMode: false,
+        };
+    }
+
+    function openAddToLogModal(date, pages, addMode) {
+        addToLogData.date = date;
+        addToLogData.pages = pages;
+        addToLogData.addMode = addMode;
+        isAddToLogModalOpen = true;
     }
 </script>
 
@@ -65,73 +189,109 @@
                         type="primary"
                         icon={AddIcon}
                         onclick={() => {
-                            isAddToLogModalOpen = true;
+                            openAddToLogModal(null, null, true);
                         }}>Add to log</Button
                     >
                     {#if streak}
-                        <Button type="secondary" icon={StreakIcon}
-                            >{streak} day streak</Button
+                        <Button
+                            type="secondary"
+                            icon={StreakIcon}
+                            onclick={() => {
+                                // TODO: This would ideally focus on the streak in the feed,
+                                // but for now this will do
+                                openAddToLogModal(null, null, true);
+                            }}>{streak} day streak</Button
                         >
                     {/if}
                 </div>
             </div>
-            <a href="#">View stats</a>
+            <Button type="link">View stats</Button>
         </div>
         <div class="books">
+            <CoverButton
+                icon={AddIcon}
+                onclick={() => {
+                    openAddBookModal();
+                }}>Add a book</CoverButton
+            >
             {#each bookData as book}
                 <Cover
                     src={book.coverURL}
                     title={book.title}
                     author={book.authors.join(", ")}
+                    onclick={() => {
+                        openAddBookModal(book.uuid);
+                    }}
                 />
             {/each}
         </div>
     </div>
-    <div class="feed">
-        <div class="feed-header">
-            <Button type="tertiary" icon={SettingsIcon} />
-        </div>
-        {#if yearlyGoal !== 0}
-            <div class="feed-label-group">
-                <h2>{new Date().getFullYear()} Reading Goal</h2>
-                <p>
-                    You’ve read <b
-                        >{booksThisYear.length} book{booksThisYear.length !== 1
-                            ? "s"
-                            : ""}</b
+    <div class="pane">
+        <div class="feed">
+            <div class="feed-header">
+                <Button
+                    type="tertiary"
+                    icon={SettingsIcon}
+                    onclick={() => {
+                        openSettingsModal();
+                    }}
+                />
+            </div>
+            {#if yearlyGoal}
+                <div class="feed-label-group">
+                    <h2>{new Date().getFullYear()} Reading Goal</h2>
+                    <p>
+                        You’ve read <b
+                            >{booksThisYear.length} book{booksThisYear.length !==
+                            1
+                                ? "s"
+                                : ""}</b
+                        >
+                        so far this year! You’re on track to meet your goal of
+                        <b>{yearlyGoal} book{yearlyGoal !== 1 ? "s" : ""}</b>.
+                    </p>
+                    <Button type="link" onclick={openSettingsModal}
+                        >Edit goal</Button
                     >
-                    so far this year! You’re on track to meet your goal of
-                    <b>{yearlyGoal} book{yearlyGoal !== 1 ? "s" : ""}</b>.
+                </div>
+                <div class="feed-group">
+                    {#each booksThisYear as book}
+                        <Cover
+                            src={book.coverURL}
+                            title={book.title}
+                            author={book.authors.join(", ")}
+                            scale={0.75}
+                        />
+                    {/each}
+                </div>
+            {/if}
+            <div class="feed-label-group">
+                <h2>Reading Streak</h2>
+                <p>
+                    {#if streak !== 0}
+                        You’re on a roll! You’ve logged reading for the past <b
+                            >{streak} day{streak !== 1 ? "s" : ""}</b
+                        >. Keep it up!
+                    {:else}
+                        You don’t have a streak right now. Try logging some
+                        reading to start one!
+                    {/if}
                 </p>
-                <a href="#">Edit goal</a>
+                <Button
+                    type="link"
+                    onclick={() => {
+                        openAddToLogModal(null, null, true);
+                    }}>Add to log</Button
+                >
             </div>
             <div class="feed-group">
-                {#each booksThisYear as book}
-                    <Cover
-                        src={book.coverURL}
-                        title={book.title}
-                        author={book.authors.join(", ")}
-                        scale={0.75}
-                    />
-                {/each}
+                <Graph
+                    data={logData}
+                    onclick={(date, pages) => {
+                        openAddToLogModal(date, pages);
+                    }}
+                />
             </div>
-        {/if}
-        <div class="feed-label-group">
-            <h2>Reading Streak</h2>
-            <p>
-                {#if streak !== 0}
-                    You’re on a roll! You’ve logged reading for the past <b
-                        >{streak} day{streak !== 1 ? "s" : ""}</b
-                    >. Keep it up!
-                {:else}
-                    You don’t have a streak right now. Try logging some reading
-                    to start one!
-                {/if}
-            </p>
-            <a href="#">Add to log</a>
-        </div>
-        <div class="feed-group">
-            <Graph data={logData} />
         </div>
     </div>
 </main>
@@ -142,23 +302,131 @@
             details="Add your recent reading to your log to keep up or start your reading streak!"
             primaryLabel="Add to log"
             secondaryLabel="Cancel"
+            primaryAction={() => {
+                logReading(
+                    addToLogData.pages,
+                    addToLogData.book,
+                    addToLogData.date,
+                    addToLogData.addMode,
+                );
+                clearAddToLogData();
+            }}
             closeModal={() => {
                 isAddToLogModalOpen = false;
+                clearAddToLogData();
             }}
         >
             <div class="modal-form">
                 <div class="input-group">
                     <label for="pages">Pages</label>
-                    <input type="text" name="pages" id="pages" required />
+                    <input
+                        type="number"
+                        name="pages"
+                        id="pages"
+                        required
+                        bind:value={addToLogData.pages}
+                    />
+                </div>
+                {#if addToLogData.addMode}
+                    <div class="input-group grow">
+                        <label for="book">Book</label>
+                        <select
+                            name="book"
+                            id="book"
+                            bind:value={addToLogData.book}
+                        >
+                            {#each currentlyReading as book}
+                                <option value={book.uuid}
+                                    >{book.title} — {book.authors.join(
+                                        ", ",
+                                    )}</option
+                                >
+                            {/each}
+                        </select>
+                    </div>
+                {/if}
+            </div>
+        </Modal>
+    {:else if isSettingsModalOpen}
+        <Modal
+            title="Settings"
+            details="Customize your logging experience."
+            primaryAction={() => {
+                saveSettings();
+            }}
+            closeModal={() => {
+                isSettingsModalOpen = false;
+            }}
+        >
+            <div class="modal-form">
+                <div class="input-group">
+                    <label for="goal">Reading Goal</label>
+                    <input
+                        type="number"
+                        name="goal"
+                        id="goal"
+                        bind:value={settingsData.yearlyGoal}
+                    />
+                </div>
+            </div>
+        </Modal>
+    {:else if isAddBookModalOpen}
+        <Modal
+            title="Add a book"
+            details="Add or edit a book on your bookshelf."
+            primaryLabel="Save book"
+            primaryAction={() => {
+                saveBook(
+                    addBookData.title,
+                    addBookData.authors?.split(/,\s?/g),
+                    addBookData.coverURL,
+                );
+            }}
+            closeModal={() => {
+                isAddBookModalOpen = false;
+                clearAddBookData();
+            }}
+        >
+            <div class="modal-form">
+                <div class="input-group grow">
+                    <label for="title">Title</label>
+                    <input
+                        type="text"
+                        name="title"
+                        id="title"
+                        required
+                        bind:value={addBookData.title}
+                    />
                 </div>
                 <div class="input-group grow">
-                    <label for="book">Book</label>
-                    <select name="book" id="book">
-                        {#each currentlyReading as book}
-                            <option value={book.uuid}>{book.title} - {book.authors.join(", ")}</option>
-                        {/each}
-                    </select>
+                    <label for="authors">Author(s)</label>
+                    <input
+                        type="text"
+                        name="authors"
+                        id="authors"
+                        required
+                        bind:value={addBookData.authors}
+                    />
                 </div>
+                <div class="input-group grow full">
+                    <label for="cover">Cover URL</label>
+                    <input
+                        type="text"
+                        name="cover"
+                        id="cover"
+                        required
+                        bind:value={addBookData.coverURL}
+                    />
+                </div>
+                <!-- <div class="input-group">
+                    <label for="bookmark">Bookmark</label>
+                    <input
+                        type="number"
+                        name="bookmark"
+                        id="bookmark"
+                        bind:value={settingsData.yearlyGoal}
+                    />
+                </div> -->
             </div>
         </Modal>
     {/if}
@@ -244,6 +512,15 @@
         flex-grow: 0;
     }
 
+    .pane {
+        flex-grow: 1;
+        align-self: stretch;
+        min-width: 0;
+
+        height: 100%;
+        overflow-y: auto;
+    }
+
     .feed {
         display: flex;
         flex-direction: column;
@@ -254,8 +531,6 @@
         border-left: 1px solid var(--dark-20);
 
         flex-grow: 1;
-        overflow: hidden;
-        align-self: stretch;
         min-width: 0;
     }
 
@@ -318,9 +593,12 @@
     .modal-form {
         display: flex;
         flex-direction: row;
+        flex-wrap: wrap;
         align-items: flex-start;
         padding: 0px;
         gap: 20px;
+
+        max-width: 100%;
 
         flex: none;
         align-self: stretch;
@@ -340,5 +618,9 @@
 
     .grow {
         flex-grow: 1;
+    }
+
+    .full {
+        flex-basis: 100%;
     }
 </style>

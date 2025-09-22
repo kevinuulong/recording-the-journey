@@ -4,7 +4,7 @@
     import ChevronLeft from "$lib/icons/ChevronLeft.svg?raw";
     import ChevronRight from "$lib/icons/ChevronRight.svg?raw";
 
-    let { data } = $props();
+    let { data, onclick } = $props();
 
     let weekOffset = $state(0);
     const currentWeek = $derived.by(() => {
@@ -83,12 +83,16 @@
             }}
         >
             {#each currentWeek as day}
+                <!-- TODO: Figure out what role this should have -->
                 <div
                     class="bar-group"
                     role="region"
                     tabindex={0}
                     onmouseenter={() => {
                         updateTooltip(day?.pages);
+                    }}
+                    onclick={() => {
+                        onclick(day?.date, day?.pages);
                     }}
                 >
                     <div

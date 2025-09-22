@@ -1,6 +1,7 @@
 <script>
     import Button from "$lib/Button.svelte";
     import Cover from "$lib/Cover.svelte";
+    import CoverButton from "$lib/CoverButton.svelte";
 
     import AddIcon from "$lib/icons/Add.svg?raw";
 </script>
@@ -18,12 +19,15 @@
     <Button icon={AddIcon} />
     <Button type="secondary" icon={AddIcon} />
     <Button type="tertiary" icon={AddIcon} />
+    <Button type="link">I'm a link</Button>
     <Button type="primary" icon={AddIcon} disabled>Add to log</Button>
     <Button type="secondary" disabled>10 day streak</Button>
     <Button type="tertiary" disabled>I'm unused</Button>
+    <Button type="link" disabled>I'm a link</Button>
 </div>
 
 <div class="components">
+    <CoverButton icon={AddIcon}>Add a book</CoverButton>
     <Cover
         src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1607462569i/53152636.jpg"
         title="Mexican Gothic"
