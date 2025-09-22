@@ -1,0 +1,103 @@
+/* TODO: I probably should bundle the font here */
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap');
+
+:root {
+    /* Colors */
+    --dark-green: #31572C;
+    --light-cream: #FFFEF9;
+    --white: #FFFFFF;
+    --dark: #2B2C30;
+    --red: #EB5757;
+    --dark-20: color-mix(in srgb, var(--dark) 20%, var(--white));
+    --dark-50: color-mix(in srgb, var(--dark) 50%, var(--white));
+
+    --scrollbar-width: calc(100vw - 100cqw);
+}
+
+html,
+body {
+    margin: 0;
+    height: 100%;
+
+    color: var(--dark);
+    font-family: 'EB Garamond';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 21px;
+
+    background: var(--light-cream);
+
+}
+
+h1 {
+    font-weight: 500;
+    font-size: 48px;
+    line-height: 63px;
+    margin: 0;
+}
+
+h2 {
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 47px;
+    margin: 0;
+}
+
+p {
+    margin: 0;
+}
+
+b {
+    font-weight: 500;
+}
+
+a {
+    color: var(--dark-green);
+}
+
+input[type="text"],
+select {
+    box-sizing: border-box;
+    padding: 5px 10px;
+
+    min-width: 100px;
+
+    border: 1px solid var(--dark-20);
+    border-radius: 5px;
+
+    color: var(--dark);
+    font-family: "EB Garamond";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 21px;
+
+    width: 100%;
+
+    &:focus {
+        outline: 1px solid var(--dark);
+    }
+}
+
+label {
+    color: var(--dark);
+    font-family: "EB Garamond";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 21px;
+}
+
+label:has(+ input:required)::after {
+    content: " *";
+    color: var(--red);
+
+}
+
+select {
+    appearance: none;
+
+    /* TODO: This ends up being the wrong color */
+    background: url("$lib/icons/Dropdown.svg") no-repeat 98%;
+}
