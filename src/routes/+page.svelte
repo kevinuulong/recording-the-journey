@@ -9,6 +9,15 @@
     import AddIcon from "$lib/icons/Add.svg?raw";
     import SettingsIcon from "$lib/icons/Settings.svg?raw";
     import StreakIcon from "$lib/icons/Streak.svg?raw";
+    import BackIcon from "$lib/icons/Back.svg?raw";
+    import BookmarkIcon from "$lib/icons/Bookmark.svg?raw";
+
+    import FormatH1Icon from "$lib/icons/FormatH1.svg?raw";
+    import FormatParagraphIcon from "$lib/icons/FormatParagraph.svg?raw";
+    import FormatQuoteIcon from "$lib/icons/FormatQuote.svg?raw";
+    import ImageIcon from "$lib/icons/Image.svg?raw";
+    import FormatNumberedListIcon from "$lib/icons/FormatNumberedList.svg?raw";
+    import FormatBulletedListIcon from "$lib/icons/FormatBulletedList.svg?raw";
 
     import { generateMockReadingLog, mockBookData } from "$lib/mock";
 
@@ -171,6 +180,8 @@
         addToLogData.addMode = addMode;
         isAddToLogModalOpen = true;
     }
+
+    let selectedBook = $state();
 </script>
 
 <main>
@@ -220,79 +231,116 @@
                     title={book.title}
                     author={book.authors.join(", ")}
                     onclick={() => {
-                        openAddBookModal(book.uuid);
+                        selectedBook = book.uuid;
+                        // openAddBookModal(book.uuid);
                     }}
                 />
             {/each}
         </div>
     </div>
     <div class="pane">
-        <div class="feed">
-            <div class="feed-header">
-                <Button
-                    type="tertiary"
-                    icon={SettingsIcon}
-                    onclick={() => {
-                        openSettingsModal();
-                    }}
-                />
-            </div>
-            {#if yearlyGoal}
-                <div class="feed-label-group">
-                    <h2>{new Date().getFullYear()} Reading Goal</h2>
-                    <p>
-                        You’ve read <b
-                            >{booksThisYear.length} book{booksThisYear.length !==
-                            1
-                                ? "s"
-                                : ""}</b
+        {#if !selectedBook}
+            <!-- TODO: This should probably be a separate component -->
+            <div class="feed">
+                <div class="feed-header">
+                    <Button
+                        type="tertiary"
+                        icon={SettingsIcon}
+                        onclick={() => {
+                            openSettingsModal();
+                        }}
+                    />
+                </div>
+                {#if yearlyGoal}
+                    <div class="feed-label-group">
+                        <h2>{new Date().getFullYear()} Reading Goal</h2>
+                        <p>
+                            You’ve read <b
+                                >{booksThisYear.length} book{booksThisYear.length !==
+                                1
+                                    ? "s"
+                                    : ""}</b
+                            >
+                            so far this year! You’re on track to meet your goal of
+                            <b>{yearlyGoal} book{yearlyGoal !== 1 ? "s" : ""}</b
+                            >.
+                        </p>
+                        <Button type="link" onclick={openSettingsModal}
+                            >Edit goal</Button
                         >
-                        so far this year! You’re on track to meet your goal of
-                        <b>{yearlyGoal} book{yearlyGoal !== 1 ? "s" : ""}</b>.
+                    </div>
+                    <div class="feed-group">
+                        {#each booksThisYear as book}
+                            <Cover
+                                src={book.coverURL}
+                                title={book.title}
+                                author={book.authors.join(", ")}
+                                scale={0.75}
+                            />
+                        {/each}
+                    </div>
+                {/if}
+                <div class="feed-label-group">
+                    <h2>Reading Streak</h2>
+                    <p>
+                        {#if streak !== 0}
+                            You’re on a roll! You’ve logged reading for the past <b
+                                >{streak} day{streak !== 1 ? "s" : ""}</b
+                            >. Keep it up!
+                        {:else}
+                            You don’t have a streak right now. Try logging some
+                            reading to start one!
+                        {/if}
                     </p>
-                    <Button type="link" onclick={openSettingsModal}
-                        >Edit goal</Button
+                    <Button
+                        type="link"
+                        onclick={() => {
+                            openAddToLogModal(null, null, true);
+                        }}>Add to log</Button
                     >
                 </div>
                 <div class="feed-group">
-                    {#each booksThisYear as book}
-                        <Cover
-                            src={book.coverURL}
-                            title={book.title}
-                            author={book.authors.join(", ")}
-                            scale={0.75}
-                        />
-                    {/each}
+                    <Graph
+                        data={logData}
+                        onclick={(date, pages) => {
+                            openAddToLogModal(date, pages);
+                        }}
+                    />
                 </div>
-            {/if}
-            <div class="feed-label-group">
-                <h2>Reading Streak</h2>
-                <p>
-                    {#if streak !== 0}
-                        You’re on a roll! You’ve logged reading for the past <b
-                            >{streak} day{streak !== 1 ? "s" : ""}</b
-                        >. Keep it up!
-                    {:else}
-                        You don’t have a streak right now. Try logging some
-                        reading to start one!
-                    {/if}
-                </p>
-                <Button
-                    type="link"
-                    onclick={() => {
-                        openAddToLogModal(null, null, true);
-                    }}>Add to log</Button
-                >
             </div>
-            <div class="feed-group">
-                <Graph
-                    data={logData}
-                    onclick={(date, pages) => {
-                        openAddToLogModal(date, pages);
-                    }}
-                />
+        {:else}
+            <div class="notes">
+                <div class="notes-header">
+                    <div class="notes-nav">
+                        <Button type="tertiary" icon={BackIcon} onclick={() => {
+                            selectedBook = null;
+                        }} />
+                        <p>Return to log</p>
+                    </div>
+                    <b class="title">Moby Dick</b>
+                    <div class="author">Herman Melville</div>
+                </div>
+                <div class="notes-body">
+                    <div class="metadata">
+                        <h1>Moby Dick</h1>
+                        <h2>Herman Melville</h2>
+                    </div>
+                </div>
+                <div class="notes-footer">
+                    <div class="bookmark">
+                        {@html BookmarkIcon}
+                        <input class="small" type="number" />
+                    </div>
+                    <p class="save-message">Saving changes...</p>
+                    <Button type="tertiary" icon={FormatH1Icon} />
+                    <Button type="tertiary" icon={FormatParagraphIcon} />
+                    <Button type="tertiary" icon={FormatQuoteIcon} />
+                    <Button type="tertiary" icon={ImageIcon} />
+                    <Button type="tertiary" icon={FormatNumberedListIcon} />
+                    <Button type="tertiary" icon={FormatBulletedListIcon} />
+                </div>
             </div>
-        </div>
+        {/if}
     </div>
 </main>
 <div class="modal-overlay">
@@ -517,6 +565,8 @@
         align-self: stretch;
         min-width: 0;
 
+        border-left: 1px solid var(--dark-20);
+
         height: 100%;
         overflow-y: auto;
     }
@@ -527,8 +577,6 @@
         align-items: flex-start;
         padding: 40px;
         gap: 20px;
-
-        border-left: 1px solid var(--dark-20);
 
         flex-grow: 1;
         min-width: 0;
@@ -614,6 +662,113 @@
 
         flex: none;
         flex-grow: 0;
+    }
+
+    .notes {
+        background-color: var(--white);
+
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+
+        flex-grow: 1;
+        min-width: 0;
+
+        height: 100%;
+    }
+
+    .metadata {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0px;
+
+        flex: none;
+        align-self: stretch;
+        flex-grow: 0;
+    }
+
+    .notes-header {
+        box-sizing: border-box;
+
+        border-bottom: 1px solid var(--dark-20);
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+
+        flex: none;
+        flex-grow: 0;
+        z-index: 0;
+        align-self: stretch;
+
+        position: relative;
+    }
+
+    .notes-nav {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0px;
+        gap: 10px;
+
+        position: absolute;
+        left: 20px;
+
+        flex: none;
+        flex-grow: 0;
+    }
+
+    .notes-body {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 40px 40px 20px;
+        gap: 40px;
+
+        flex: none;
+        align-self: stretch;
+        flex-grow: 1;
+    }
+
+    .notes-footer {
+        box-sizing: border-box;
+
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: center;
+        padding: 20px;
+        gap: 10px;
+
+        border-top: 1px solid var(--dark-20);
+
+        flex: none;
+        align-self: stretch;
+        flex-grow: 0;
+    }
+
+    .bookmark {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0px;
+        gap: 5px;
+
+        flex: none;
+        flex-grow: 0;
+
+        input {
+            width: 64px;
+        }
+    }
+
+    .save-message {
+        flex-grow: 1;
+        margin-left: 10px;
+        margin-right: 10px;
     }
 
     .grow {

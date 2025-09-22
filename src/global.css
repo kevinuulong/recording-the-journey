@@ -79,6 +79,10 @@ select {
     &:focus {
         outline: 1px solid var(--dark);
     }
+
+    &.small {
+        min-width: 44px;
+    }
 }
 
 label {
