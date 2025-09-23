@@ -255,7 +255,7 @@
                     {/if}
                 </div>
             </div>
-            <Button type="link">View stats</Button>
+            <!-- <Button type="link">View stats</Button> -->
         </div>
         <div class="books">
             <CoverButton
