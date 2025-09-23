@@ -11,7 +11,17 @@
     --dark-20: color-mix(in srgb, var(--dark) 20%, var(--white));
     --dark-50: color-mix(in srgb, var(--dark) 50%, var(--white));
 
-    --scrollbar-width: calc(100vw - 100cqw);
+}
+
+@media (prefers-color-scheme: dark) {
+
+    /* TODO: I should probably rename these to make more sense, but it works well enough as is that I'm leaving it for now */
+    :root {
+        --light-cream: #1d1c19;
+        --white: #121212;
+        --dark: #FFFFFF;
+        --dark-green: #9fc896;
+    }
 }
 
 html,
@@ -56,6 +66,12 @@ a {
     color: var(--dark-green);
 }
 
+blockquote {
+    border-left: 2px solid var(--dark-20);
+    margin-left: 0;
+    padding-left: 1rem;
+}
+
 input[type="text"],
 input[type="number"],
 select {
@@ -68,6 +84,7 @@ select {
     border-radius: 5px;
 
     color: var(--dark);
+    background-color: var(--white);
     font-family: "EB Garamond";
     font-style: normal;
     font-weight: 400;
@@ -83,6 +100,10 @@ select {
     &.small {
         min-width: 44px;
     }
+}
+
+option {
+    background-color: var(--white);
 }
 
 label {

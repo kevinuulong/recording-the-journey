@@ -2,6 +2,7 @@
     import Button from "$lib/Button.svelte";
     import Cover from "$lib/Cover.svelte";
     import CoverButton from "$lib/CoverButton.svelte";
+    import Editor from "$lib/Editor.svelte";
 
     import AddIcon from "$lib/icons/Add.svg?raw";
 </script>
@@ -38,6 +39,10 @@
         title="A Gentleman in Moscow"
         author="Amor Towles"
     />
+</div>
+
+<div class="components">
+    <Editor />
 </div>
 
 <style>

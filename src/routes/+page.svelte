@@ -18,13 +18,48 @@
     import ImageIcon from "$lib/icons/Image.svg?raw";
     import FormatNumberedListIcon from "$lib/icons/FormatNumberedList.svg?raw";
     import FormatBulletedListIcon from "$lib/icons/FormatBulletedList.svg?raw";
+    import EditIcon from "$lib/icons/Edit.svg?raw";
+    import CheckIcon from "$lib/icons/Check.svg?raw";
 
     import { generateMockReadingLog, mockBookData } from "$lib/mock";
+
+    import Editor from "$lib/Editor.svelte";
+    import { onMount } from "svelte";
+
+    let bookData = $state(mockBookData);
+    let selectedBook = $state({
+        uuid: null,
+        title: null,
+        authors: [],
+        coverURL: null,
+        dateCompleted: null,
+        pages: null,
+        notes: null,
+    });
+
+    let editor = $state();
+    let editorState = $state({ editor: null });
+
+    let notesSavingMessage = $state("");
+
+    $effect(() => {
+        if (selectedBook.notes && editor) {
+            notesSavingMessage = "Saving changes...";
+            // NOTE: Simulates database/server save time
+            setTimeout(() => {
+                notesSavingMessage = "";
+            }, 1000);
+        }
+    });
+
+    function setSelectedBook(uuid) {
+        const bookIndex = bookData.findIndex((book) => book.uuid === uuid);
+        selectedBook = bookData[bookIndex];
+    }
 
     let logData = $state(generateMockReadingLog(35));
     const streak = $derived(getStreak(logData));
 
-    let bookData = $state(mockBookData);
     const booksThisYear = $derived(
         bookData.filter((book) => {
             if (book.dateCompleted === undefined) return false;
@@ -77,6 +112,7 @@
     });
 
     function openAddBookModal(uuid) {
+        console.log(uuid);
         if (uuid) {
             const bookIndex = bookData.findIndex((book) => book.uuid === uuid);
             addBookData.title = bookData[bookIndex].title;
@@ -88,6 +124,7 @@
     }
 
     function saveBook(title, authors, coverURL, uuid) {
+        console.log(uuid);
         const book = {
             title,
             authors,
@@ -105,6 +142,10 @@
                 ...bookData[bookIndex],
                 ...book,
             };
+
+            if (uuid === selectedBook?.uuid) {
+                selectedBook = bookData[bookIndex];
+            }
         }
     }
 
@@ -135,7 +176,7 @@
     function logReading(pages, uuid, date, addMode = false) {
         if (uuid) {
             const bookIndex = bookData.findIndex((book) => book.uuid === uuid);
-            bookData[bookIndex].pages += pages;
+            bookData[bookIndex].page += pages;
         }
         if (date) {
             date = new Date(date * 1000);
@@ -158,7 +199,7 @@
                 // is technically able to handle any position
                 logData.splice(i + 1, 0, {
                     date: Math.floor(date.getTime() / 1000),
-                    pages,
+                    page: pages,
                 });
                 break;
             }
@@ -180,8 +221,6 @@
         addToLogData.addMode = addMode;
         isAddToLogModalOpen = true;
     }
-
-    let selectedBook = $state();
 </script>
 
 <main>
@@ -231,15 +270,14 @@
                     title={book.title}
                     author={book.authors.join(", ")}
                     onclick={() => {
-                        selectedBook = book.uuid;
-                        // openAddBookModal(book.uuid);
+                        setSelectedBook(book.uuid);
                     }}
                 />
             {/each}
         </div>
     </div>
     <div class="pane">
-        {#if !selectedBook}
+        {#if !selectedBook?.uuid}
             <!-- TODO: This should probably be a separate component -->
             <div class="feed">
                 <div class="feed-header">
@@ -312,32 +350,131 @@
             <div class="notes">
                 <div class="notes-header">
                     <div class="notes-nav">
-                        <Button type="tertiary" icon={BackIcon} onclick={() => {
-                            selectedBook = null;
-                        }} />
+                        <Button
+                            type="tertiary"
+                            icon={BackIcon}
+                            onclick={() => {
+                                selectedBook = null;
+                            }}
+                        />
                         <p>Return to log</p>
                     </div>
-                    <b class="title">Moby Dick</b>
-                    <div class="author">Herman Melville</div>
+                    <b class="title">{selectedBook.title}</b>
+                    <div class="author">{selectedBook.authors.join(", ")}</div>
+                    <div class="book-edit">
+                        <Button
+                            type="tertiary"
+                            icon={EditIcon}
+                            onclick={() => {
+                                openAddBookModal(selectedBook.uuid);
+                            }}
+                        />
+                    </div>
                 </div>
                 <div class="notes-body">
                     <div class="metadata">
-                        <h1>Moby Dick</h1>
-                        <h2>Herman Melville</h2>
+                        <h1>{selectedBook.title}</h1>
+                        <h2>{selectedBook.authors.join(", ")}</h2>
                     </div>
+                    {#key selectedBook.uuid}
+                        <Editor
+                            bind:editor
+                            bind:editorState
+                            bind:content={selectedBook.notes}
+                        />
+                    {/key}
                 </div>
                 <div class="notes-footer">
                     <div class="bookmark">
                         {@html BookmarkIcon}
-                        <input class="small" type="number" />
+                        <input
+                            class="small"
+                            type="number"
+                            bind:value={selectedBook.page}
+                        />
+                        <Button
+                            type={selectedBook.dateCompleted
+                                ? "primary"
+                                : "tertiary"}
+                            icon={CheckIcon}
+                            onclick={() => {
+                                if (!selectedBook.dateCompleted) {
+                                    selectedBook.dateCompleted = Math.floor(
+                                        new Date().getTime() / 1000,
+                                    );
+                                } else {
+                                    selectedBook.dateCompleted = null;
+                                }
+                            }}
+                        />
                     </div>
-                    <p class="save-message">Saving changes...</p>
-                    <Button type="tertiary" icon={FormatH1Icon} />
-                    <Button type="tertiary" icon={FormatParagraphIcon} />
-                    <Button type="tertiary" icon={FormatQuoteIcon} />
-                    <Button type="tertiary" icon={ImageIcon} />
-                    <Button type="tertiary" icon={FormatNumberedListIcon} />
-                    <Button type="tertiary" icon={FormatBulletedListIcon} />
+                    <p class="save-message">{notesSavingMessage}</p>
+                    {#if editor}
+                        <Button
+                            type={editorState.editor?.isActive("heading", {
+                                level: 2,
+                            })
+                                ? "primary"
+                                : "tertiary"}
+                            icon={FormatH1Icon}
+                            onclick={() => {
+                                editor
+                                    ?.chain()
+                                    .focus()
+                                    .toggleHeading({ level: 2 })
+                                    .run();
+                            }}
+                        />
+                        <Button
+                            type={editorState.editor?.isActive("paragraph")
+                                ? "primary"
+                                : "tertiary"}
+                            icon={FormatParagraphIcon}
+                            onclick={() => {
+                                editor?.chain().focus().setParagraph().run();
+                            }}
+                        />
+                        <Button
+                            type={editorState.editor?.isActive("blockquote")
+                                ? "primary"
+                                : "tertiary"}
+                            icon={FormatQuoteIcon}
+                            onclick={() => {
+                                editor
+                                    ?.chain()
+                                    .focus()
+                                    .toggleBlockquote()
+                                    .run();
+                            }}
+                        />
+                        <Button type="tertiary" icon={ImageIcon} />
+                        <Button
+                            type={editorState.editor?.isActive("orderedList")
+                                ? "primary"
+                                : "tertiary"}
+                            icon={FormatNumberedListIcon}
+                            onclick={() => {
+                                editor
+                                    ?.chain()
+                                    .focus()
+                                    .toggleOrderedList()
+                                    .run();
+                            }}
+                        />
+                        <Button
+                            type={editorState.editor?.isActive("bulletList")
+                                ? "primary"
+                                : "tertiary"}
+                            icon={FormatBulletedListIcon}
+                            onclick={() => {
+                                editor
+                                    ?.chain()
+                                    .focus()
+                                    .toggleBulletList()
+                                    .run();
+                            }}
+                        />
+                    {/if}
                 </div>
             </div>
         {/if}
@@ -416,6 +553,15 @@
                         bind:value={settingsData.yearlyGoal}
                     />
                 </div>
+                <!-- TODO: Currently the only way to change the theme is by changing prefers-color-scheme -->
+
+                <!-- <div class="input-group">
+                    <label for="theme">Color Theme</label>
+                    <select name="theme" id="theme" bind:value={colorTheme}>
+                        <option value="light">Light Mode</option>
+                        <option value="dark">Dark Mode</option>
+                    </select>
+                </div> -->
             </div>
         </Modal>
     {:else if isAddBookModalOpen}
@@ -428,6 +574,7 @@
                     addBookData.title,
                     addBookData.authors?.split(/,\s?/g),
                     addBookData.coverURL,
+                    addBookData.uuid,
                 );
             }}
             closeModal={() => {
@@ -466,15 +613,6 @@
                         bind:value={addBookData.coverURL}
                     />
                 </div>
-                <!-- <div class="input-group">
-                    <label for="bookmark">Bookmark</label>
-                    <input
-                        type="number"
-                        name="bookmark"
-                        id="bookmark"
-                        bind:value={settingsData.yearlyGoal}
-                    />
-                </div> -->
             </div>
         </Modal>
     {/if}
@@ -681,7 +819,7 @@
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        padding: 0px;
+        padding: 40px 40px 0px;
 
         flex: none;
         align-self: stretch;
@@ -721,12 +859,17 @@
         flex-grow: 0;
     }
 
+    .book-edit {
+        position: absolute;
+
+        right: 20px;
+    }
+
     .notes-body {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        padding: 40px 40px 20px;
-        gap: 40px;
+        padding: 0;
 
         flex: none;
         align-self: stretch;

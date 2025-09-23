@@ -39,6 +39,7 @@
 
         const date = new Date(timestamp * 1000);
         const today = new Date();
+        today.setHours(0,0,0,0);
 
         // Compare the number of days since the UNIX epoch
         return (
