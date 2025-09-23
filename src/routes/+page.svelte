@@ -15,6 +15,8 @@
     import FormatH1Icon from "$lib/icons/FormatH1.svg?raw";
     import FormatParagraphIcon from "$lib/icons/FormatParagraph.svg?raw";
     import FormatQuoteIcon from "$lib/icons/FormatQuote.svg?raw";
+    import FormatBoldIcon from "$lib/icons/FormatBold.svg?raw";
+    import FormatItalicIcon from "$lib/icons/FormatItalic.svg?raw";
     import ImageIcon from "$lib/icons/Image.svg?raw";
     import FormatNumberedListIcon from "$lib/icons/FormatNumberedList.svg?raw";
     import FormatBulletedListIcon from "$lib/icons/FormatBulletedList.svg?raw";
@@ -435,6 +437,24 @@
                             }}
                         />
                         <Button
+                            type={editorState.editor?.isActive("bold")
+                                ? "primary"
+                                : "tertiary"}
+                            icon={FormatBoldIcon}
+                            onclick={() => {
+                                editor?.chain().focus().toggleBold().run();
+                            }}
+                        />
+                        <Button
+                            type={editorState.editor?.isActive("italic")
+                                ? "primary"
+                                : "tertiary"}
+                            icon={FormatItalicIcon}
+                            onclick={() => {
+                                editor?.chain().focus().toggleItalic().run();
+                            }}
+                        />
+                        <Button
                             type={editorState.editor?.isActive("blockquote")
                                 ? "primary"
                                 : "tertiary"}
@@ -447,7 +467,6 @@
                                     .run();
                             }}
                         />
-                        <Button type="tertiary" icon={ImageIcon} />
                         <Button
                             type={editorState.editor?.isActive("orderedList")
                                 ? "primary"
