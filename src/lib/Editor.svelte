@@ -23,7 +23,7 @@
                 }),
             ],
             content,
-            autofocus: "end",
+            autofocus: "start",
             onTransaction: ({ editor }) => {
                 // force re-render so `editor.isActive` works as expected
                 editorState = { editor };

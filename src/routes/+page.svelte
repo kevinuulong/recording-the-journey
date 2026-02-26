@@ -893,6 +893,9 @@
         flex: none;
         align-self: stretch;
         flex-grow: 1;
+
+        overflow-y: auto;
+        height: calc(100% - 82.8px - 76.4px);
     }
 
     .notes-footer {

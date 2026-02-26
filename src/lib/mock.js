@@ -60,6 +60,237 @@ export const mockBookData = [{
     authors: ["Silvia Moreno-Garcia"],
     coverURL: "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1607462569i/53152636.jpg",
     page: 100,
+    notes: {
+        "type": "doc",
+        "content": [
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 2
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Chapter 1"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "This is where I can write my notes about the first chapter."
+                    }
+                ]
+            },
+            {
+                "type": "bulletList",
+                "content": [
+                    {
+                        "type": "listItem",
+                        "content": [
+                            {
+                                "type": "paragraph",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "I can even include lists"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "listItem",
+                        "content": [
+                            {
+                                "type": "paragraph",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "Isn't that cool?!?"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "blockquote",
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "Oh look a super important quote from the book. This one's definitely in there (please don't fact check that)."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "italic"
+                            }
+                        ],
+                        "text": "Look at this paragraph. Its in italics!"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph"
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "You can write in "
+                    },
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "code"
+                            }
+                        ],
+                        "text": "Markdown"
+                    },
+                    {
+                        "type": "text",
+                        "text": " or even use the "
+                    },
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "link",
+                                "attrs": {
+                                    "href": "https://en.wikipedia.org/wiki/WYSIWYG?useskin=vector",
+                                    "target": "_blank",
+                                    "rel": "noopener noreferrer nofollow",
+                                    "class": null
+                                }
+                            }
+                        ],
+                        "text": "WYSIWYG"
+                    },
+                    {
+                        "type": "text",
+                        "text": " editor controls below!"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph"
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 2
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Chapter 2"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "I would include actual details about the book here but I don't want to give you any spoilers."
+                    }
+                ]
+            },
+            {
+                "type": "orderedList",
+                "attrs": {
+                    "start": 1,
+                    "type": null
+                },
+                "content": [
+                    {
+                        "type": "listItem",
+                        "content": [
+                            {
+                                "type": "paragraph",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "Oh look..."
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "listItem",
+                        "content": [
+                            {
+                                "type": "paragraph",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "A numbered list!"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "listItem",
+                        "content": [
+                            {
+                                "type": "paragraph",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "And is that "
+                                    },
+                                    {
+                                        "type": "text",
+                                        "marks": [
+                                            {
+                                                "type": "bold"
+                                            }
+                                        ],
+                                        "text": "bold text"
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": " I see?"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "I could keep going but I think you get the point."
+                    }
+                ]
+            },
+            {
+                "type": "paragraph"
+            }
+        ]
+    }
 },
 {
     uuid: "4fc6940a-b111-474e-98ee-a8ec9fcf9e50",
@@ -69,21 +300,21 @@ export const mockBookData = [{
     dateCompleted: 1757822400,
     page: 462
 
-},{
+}, {
     uuid: "a5a770f9-de9b-4dc4-8065-5171fde62177",
     title: "The Saint of Bright Doors",
     authors: ["Vajra Chandrasekera"],
     coverURL: "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1707333565i/61884985.jpg",
     dateCompleted: 1757822400,
     page: 356
-},{
+}, {
     uuid: "70b20880-35d1-4345-bd54-53ee9ded3f1f",
     title: "Raising Hare: A Memoir",
     authors: ["Chloe Dalton"],
     coverURL: "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1748353120i/214269337.jpg",
     dateCompleted: 1757822400,
     page: 304
-},{
+}, {
     uuid: "444fb30f-0d6d-4f93-887f-b60a8153db2b",
     title: "Tom Lake",
     authors: ["Ann Patchett"],
